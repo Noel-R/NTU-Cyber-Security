@@ -12,8 +12,6 @@ def main(args):
             if MagicNumber[0] == 'd4c3b2a1': MagicNumber.append('little')
             else: MagicNumber.append('big')
 
-            print(MagicNumber[1])
-
             HeaderDict = {
                 "Major Version Number": int.from_bytes(file.read(2), MagicNumber[1]),
                 "Minor Version Number": int.from_bytes(file.read(2), MagicNumber[1]),
@@ -22,7 +20,7 @@ def main(args):
                 "Snapshot Length": int.from_bytes(file.read(4), MagicNumber[1]),
                 "Networks": int.from_bytes(file.read(4), MagicNumber[1])
             }
-
+            print(f"Magic Number: {MagicNumber[0]} - {MagicNumber[1]}")
             for key, value in HeaderDict.items():
                 if key == "Networks":
                     if value == 0: print(f"{key}: {value} - Null")
@@ -47,8 +45,7 @@ def main(args):
 
                 except Exception:
                     running = False
-            print(len(packets))
-            print(packets[0])
+            print(f"Packets Found: {len(packets)}")
 
 
 if __name__ == '__main__':
