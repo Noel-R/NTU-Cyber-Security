@@ -20,16 +20,14 @@ def main(args):
                 "Snapshot Length": int.from_bytes(file.read(4), MagicNumber[1]),
                 "Networks": int.from_bytes(file.read(4), MagicNumber[1])
             }
-            print(f"Magic Number: {MagicNumber[0]} - {MagicNumber[1]}")
+
             for key, value in HeaderDict.items():
                 if key == "Networks":
-                    if value == 0: print(f"{key}: {value} - Null")
-                    if value == 1: print(f"{key}: {value} - Ethernet")
+                    if value == 0: HeaderDict["Networks"] = f"{value} - Null"
+                    if value == 1: HeaderDict["Networks"] = f"{value} - Ethernet"
                 elif key == "Snapshot Length":
-                    if value != 65535: print(f"{key}: {value} - Packets Shouldn't be Captured")
-                    else: print(f"{key}: {value} - Packets Should be Captured")
-                else:
-                    print(f"{key}: {value}")
+                    if value != 65535: HeaderDict["Snapshot Length"] = f"{value} - Packets Shouldn't be Captured"
+                    else: HeaderDict["Snapshot Length"] = f"{value} - Packets Should be Captured"
 
             running = True
             while running:
@@ -45,7 +43,33 @@ def main(args):
 
                 except Exception:
                     running = False
-            print(f"Packets Found: {len(packets)}")
+
+        with open("temp.txt", 'w') as temp:
+            information = \
+                f'''
+                                File Information
+                    
+                    File Name: {args[1]}                         
+                    
+                                Global Header
+                    
+                    MagicNumber: {MagicNumber[0]} - {MagicNumber[1]}
+                    Major Version Number: {HeaderDict.get("Major Version Number")}
+                    Minor Version Number: {HeaderDict.get("Minor Version Number")}
+                    Timezone: {HeaderDict.get("Timezone")}
+                    Accuracy of Timestamps: {HeaderDict.get("Accuracy of Timestamps")}
+                    Network Type: {HeaderDict.get("Networks")}
+                    Snapshot Length: {HeaderDict.get("Snapshot Length")}
+                    
+                                Packet Information
+                                
+                    Number of Packets: {len(packets)}
+                '''
+
+            temp.write(information)
+
+        with open("temp.txt", 'r') as temp:
+            print(temp.read())
 
 
 if __name__ == '__main__':
