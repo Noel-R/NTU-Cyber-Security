@@ -1,6 +1,6 @@
 
                                 File Information
-                    
+
                     File Name: CyberSecurity2022.pcap                         
                     
                                 Global Header

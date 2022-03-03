@@ -1,10 +1,12 @@
-import sys, re, datetime
+import sys, re, datetime, os
 
 packets = []
+firstRun = True
 
 
 def main(args):
-    if args[0]:
+    global firstRun
+    if firstRun:
         with open(args[1], 'rb') as file:
 
             MagicNumber = [file.read(4).hex()]
@@ -67,9 +69,70 @@ def main(args):
                 '''
 
             temp.write(information)
+        firstRun = False
 
-        with open("temp.txt", 'r') as temp:
-            print(temp.read())
+    print(
+    f'''
+                    -=Packet Capture Analyser=-         
+                
+                Hello, this tool is made for very basic
+                packet capture analysis, specifically
+                the packet capture provided for coursework
+                by NTU Cyber Security Course.
+                
+                Please select one of the below options:
+                
+                    1 - Print File Information
+                    2 - Analyse Specific Packet
+                    3 - Quit
+    
+    ''')
+
+    running = True
+    while running:
+        try:
+
+            choice = int(input())
+
+            if choice == 1:
+                printInfo()
+            elif choice == 2:
+                print("Analyse Packet")
+            elif choice == 3:
+                print("Quit")
+                os.remove("temp.txt")
+                quit()
+
+        except ValueError:
+            print("Please choose a valid option.")
+            pass
+
+
+def printInfo():
+
+    with open("temp.txt", 'r') as temp:
+        print(temp.read())
+
+    try:
+
+        choice = str(input(f"\nWould you like to save the file? Y / N: ")).lower()
+
+        if choice == 'y':
+            with open("PCAP_Saved.txt", 'w') as file:
+                temp = open("temp.txt", 'r')
+                file.write(temp.read())
+                temp.close()
+            print("Saved as PCAP_Saved.txt")
+            os.system('CLS')
+            args = []
+            main(args)
+        elif choice == 'n':
+            print("Returning to menu.")
+            os.system('CLS')
+
+    except ValueError:
+        print("Invalid input, please use 'Y' or 'N'.")
+        printInfo()
 
 
 if __name__ == '__main__':
