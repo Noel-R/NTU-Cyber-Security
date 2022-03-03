@@ -4,8 +4,9 @@ packets = []
 firstRun = True
 
 
-def main(args):
+def main():
     global firstRun
+    args = sys.argv
     if firstRun:
         with open(args[1], 'rb') as file:
 
@@ -95,9 +96,10 @@ def main(args):
             choice = int(input())
 
             if choice == 1:
+                clearConsole()
                 printInfo()
             elif choice == 2:
-                print("Analyse Packet")
+                AnalysePacket()
             elif choice == 3:
                 print("Quit")
                 os.remove("temp.txt")
@@ -123,17 +125,75 @@ def printInfo():
                 file.write(temp.read())
                 temp.close()
             print("Saved as PCAP_Saved.txt")
-            os.system('CLS')
-            args = []
-            main(args)
+            clearConsole()
+            main()
         elif choice == 'n':
             print("Returning to menu.")
-            os.system('CLS')
+            clearConsole()
+            main()
 
     except ValueError:
         print("Invalid input, please use 'Y' or 'N'.")
         printInfo()
 
 
+def AnalysePacket():
+    def getPacket(number):
+        print(
+        f"""
+                    Packet Number: {number + 1}
+                    
+                    Timestamp: {packets[number][0][0]}
+                    Included Length: {packets[number][0][2]}
+                    Original Length: {packets[number][0][3]}
+                    
+                    Data: {packets[number][1].strip()}
+        
+        
+                    <- P --- RETURN --- N ->
+        """)
+
+        try:
+            choice = str(input()).upper()
+            if choice == "N" and number + 1 <= len(packets):
+                getPacket(number + 1)
+            elif choice == "P" and number - 1 > 0:
+                getPacket(number - 1)
+            elif choice == "RETURN":
+                clearConsole()
+                main()
+            else:
+                raise Exception
+
+        except ValueError:
+            print("Invalid input, use 'P', 'N' or 'RETURN'.")
+            getPacket(number)
+
+        except Exception:
+            print("The specified packet is out of range, returning to previous packet.")
+            getPacket(number)
+
+    analysing = True
+    while analysing:
+        try:
+
+            choice = int(input(f"Choose a packet, from 1 - {len(packets)}: "))
+            if 0 >= choice or choice > len(packets):
+                raise ValueError
+            else:
+                getPacket(choice - 1)
+
+        except ValueError:
+            print(f"Error. Please choose a packet, from 1 - {len(packets)}")
+            pass
+
+
+def clearConsole():
+    cmd = 'clear'
+    if os.name in ('nt', 'dos'):
+        cmd = 'cls'
+    os.system(cmd)
+
+
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
