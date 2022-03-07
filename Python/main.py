@@ -139,6 +139,10 @@ def printInfo():
 
 def AnalysePacket():
     def getPacket(number):
+
+        data = packets[number][1].decode("utf-8", 'ignore')
+        rePattern = [re.compile(r'(\S+?\Scom)'), re.compile(r'(?:[0-9]{1,3}\S){3}[0-9]{1,3}')]
+        
         print(
         f"""
                     Packet Number: {number + 1}
@@ -147,8 +151,9 @@ def AnalysePacket():
                     Included Length: {packets[number][0][2]}
                     Original Length: {packets[number][0][3]}
                     
-                    Data: {packets[number][1].strip()}
-        
+                    Data: {data}
+                    RE Search: {rePattern[0].findall(data)}
+                    RE Search: {rePattern[1].findall(data)}
         
                     <- P --- RETURN --- N ->
         """)
