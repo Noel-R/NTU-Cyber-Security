@@ -2,10 +2,11 @@ import sys, re, datetime, os
 
 packets = []
 firstRun = True
+MagicNumber = None
 
 
 def main():
-    global firstRun
+    global firstRun, MagicNumber
     args = sys.argv
     if firstRun:
         with open(args[1], 'rb') as file:
@@ -99,8 +100,15 @@ def main():
                 clearConsole()
                 printInfo()
             elif choice == 2:
+                clearConsole()
                 AnalysePacket()
             elif choice == 3:
+                clearConsole()
+                task3(packets[0][1])
+            elif choice == 4:
+                clearConsole()
+                task4()
+            elif choice == 5:
                 print("Quit")
                 os.remove("temp.txt")
                 quit()
@@ -139,16 +147,19 @@ def printInfo():
 
 def AnalysePacket():
     def getPacket(number):
+
+        packetData = packets[number][1]
+
         print(
         f"""
                     Packet Number: {number + 1}
                     
-                    Timestamp: {packets[number][0][0]}
-                    Included Length: {packets[number][0][2]}
-                    Original Length: {packets[number][0][3]}
+                    Timestamp Epoch:        {datetime.datetime.timestamp(packets[number][0][0])}
+                    Timestamp GMT+00:00:    {packets[number][0][0]}
+                    Included Length:        {packets[number][0][2]}
+                    Original Length:        {packets[number][0][3]}
                     
-                    Data: {packets[number][1].strip()}
-        
+                    Data: {packetData}
         
                     <- P --- RETURN --- N ->
         """)
@@ -193,6 +204,73 @@ def clearConsole():
     if os.name in ('nt', 'dos'):
         cmd = 'cls'
     os.system(cmd)
+
+
+def task4():
+    with open(sys.argv[1], 'rb') as file:
+        rePattern = re.compile(b"(http:)w+?.top")
+        print(rePattern.findall(file.read()[24:]))
+
+    try:
+        choice = str(input()).upper()
+        if choice == "RETURN":
+            clearConsole()
+            main()
+        else:
+            raise Exception
+
+    except ValueError:
+        print("Invalid input use 'RETURN' to return.")
+
+
+def task3(dat):
+    global MagicNumber
+    data = dat[42:]
+    dhcpPacketDict = {
+        "Transaction ID": data[4:8].hex(),
+        "Seconds Elapsed": data[8:9].hex(),
+        "This Client IP Address": data[16:20].hex('.'),
+        "Source": data[20:24].hex('.'),
+        "This Client MAC Address": data[28:33].hex(':'),
+        "Client Name": data[290:299].decode()
+    }
+    for key, val in dhcpPacketDict.items():
+        if key == "This Client IP Address" or key == "Source":
+            val = val.split('.')
+            i = 0
+            for num in val:
+                num = str(int(num, 16))
+                val[i] = num
+                i += 1
+            val = '.'.join(val)
+            dhcpPacketDict[key] = val
+
+    print(
+    f"""
+                        Task 3
+                DHCP Packet Information
+            
+            Transaction ID: {dhcpPacketDict.get("Transaction ID")}
+            Seconds Elapsed: {dhcpPacketDict.get("Seconds Elapsed")}
+            This Client IP Address: {dhcpPacketDict.get("This Client IP Address")}
+            Source: {dhcpPacketDict.get("Source")}
+            This Client MAC Address: {dhcpPacketDict.get("This Client MAC Address")}
+            Client Name: {dhcpPacketDict.get("Client Name")}
+            
+                       <RETURN>
+                    
+    """)
+
+    try:
+        choice = str(input()).upper()
+        if choice == "RETURN":
+            clearConsole()
+            main()
+        else:
+            raise Exception
+
+    except ValueError:
+        print("Invalid input use 'RETURN' to return.")
 
 
 if __name__ == '__main__':
