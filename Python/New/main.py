@@ -1,6 +1,7 @@
 # Imports, Re for Regular Expressions, Datetime for Converting times, Sys to parse command line arguments.
 
 import sys, datetime, re
+import more_itertools as mit
 
 # This is a class made for the ease of use and file handling.
 # The class is responsible for all operations with the file.
@@ -342,11 +343,74 @@ class PacketCapture:
 
         return
 
+    def dhcpPacketDisect(self):
+        packet = bytes(self.packetList[0][1][42:])
+        rePCsearch = re.compile(b'\w+-PC{1}')
+        print(f"packet type: {type(packet)}")
+        dhcpPacketDict = dict(op=packet[0], htype=packet[1],
+                              hlen=packet[2],
+                              hops=packet[3], xid=f"0x{packet[4:8].hex()}",
+                              secs=int.from_bytes(packet[8:10], self.MagicNumber), flags=packet[10:12],
+                              ciaddr=packet[12:16].hex('.'), yiaddr=packet[16:20].hex('.'),
+                              siaddr=packet[20:24].hex('.'), giaddr=packet[24:28].hex('.'),
+                              mac=packet[28:43].hex().strip("0"), sname=packet[43:107].hex(), file=packet[107:234].hex(),
+                              options=packet[234:], hostPcName=rePCsearch.findall(packet[234:]))
+
+        for key, val in dhcpPacketDict.items():
+            if "addr" in key:
+                val = val.split(".")
+                print(val)
+                newVal = f"{int(val[0], 16)}.{int(val[1], 16)}.{int(val[2], 16)}.{int(val[3], 16)}"
+                dhcpPacketDict[key] = newVal
+            if "mac" in key:
+                val = ["".join(c) for c in mit.grouper(2, val)]
+                dhcpPacketDict[key] = ':'.join(val)
+
+        print(
+        f"""
+                        -= DHCP Packet Information =-
+                        
+                                Packet Number 1
+                            
+                              -= Contents =-
+                              
+                        Message Type: {dhcpPacketDict.get("op")}
+                        Hardware Address Type: {dhcpPacketDict.get("htype")}
+                        Hardware Address Length: {dhcpPacketDict.get("hlen")}
+                        Hops: {dhcpPacketDict.get("hops")}
+                        Transaction ID: {dhcpPacketDict.get("xid")}
+                        Seconds Elapsed: {dhcpPacketDict.get("secs")}
+                        Flags: {dhcpPacketDict.get("flags")}
+                        Client Internet Address: {dhcpPacketDict.get("ciaddr")}
+                        Your Internet Address: {dhcpPacketDict.get("yiaddr")}
+                        Server Address: {dhcpPacketDict.get("siaddr")}
+                        Gateway Address: {dhcpPacketDict.get("giaddr")}
+                        Client Hardware Address: {dhcpPacketDict.get("mac")}
+                        Server Name: {dhcpPacketDict.get("sname")}
+                        Boot File: {dhcpPacketDict.get("file")}
+                        Options: {dhcpPacketDict.get("options")}
+                        PC Host Name: {dhcpPacketDict.get("hostPcName")}
+        """)
+
+        inMenu = True
+        while inMenu:
+            try:
+                choice = str(input("Choice: ")).lower()
+
+                if choice in ["return", "ret", "r"]:
+                    return
+                else:
+                    raise ValueError
+            except ValueError:
+                print("Choice is not valid, please use 'RETURN' to return to menu.")
+                continue
+
     def task3(self):
-        print("Task 3")
+        print("Task 4")
 
     def task4(self):
-        print("Task 4")
+        pass
+
 
 
 def menu():
@@ -366,7 +430,7 @@ def menu():
                     
                 1 [ Check Global Header ]
                 2 [   Search Packets    ]
-                3 [       Task 3        ]
+                3 [    DHCP Packet      ]
                 4 [       Task 4        ]
                 5 [        Quit         ]
 
@@ -472,7 +536,7 @@ if __name__ == '__main__':
                     elif option == 2:  # Packet Search
                         pcapClass.searchPackets()
                     elif option == 3:  # Task 3
-                        pcapClass.task3()
+                        pcapClass.dhcpPacketDisect()
                     elif option == 4:  # Task 4
                         pcapClass.task4()
                     elif option == 5:  # Quit
