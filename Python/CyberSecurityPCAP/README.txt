@@ -22,3 +22,8 @@ File Usage:
         It also uses the 'more-itertools' module, which does not come as standard.
         This module is used in some iteration during the formatting of required code.
         Please add it before continuing running the file.
+
+Task 1 - Option 1 From the Menu.
+Task 2 - Option 3 From the Menu.
+Task 3 - Option 4 From the Menu.
+Task 4 - Option 5 From the Menu.
