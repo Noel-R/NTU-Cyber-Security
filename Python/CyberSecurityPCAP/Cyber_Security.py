@@ -24,7 +24,7 @@ class PacketCapture:
         # Compiled Regular Expressions to search for.
 
         self.websitePattern = re.compile(
-            rb'(?:http|https)?(?:\:\/\/)(?:www\.)?(?:[a-zA-z,.!?-]\w+(?:\.)?)+(?:\.com|\.net|\.top){1}(?:\/(?:[a-zA-z0-9,.!?-]\w+)*)*')
+            rb'(?:http|https)?(?:\:\/\/)(?:www\.)?(?:[a-zA-z,.!?-]\w+(?:\.)?)+(?:\.com|\.net|\.top){1}(?:\/(?:[a-zA-z0-9,.!?+=&-]\w+)*)*')
 
         # Try to open the file, return and delete this object if bad filepath.
         # If successful, start the main decomposition of the file with initialRun().
@@ -520,6 +520,10 @@ class PacketCapture:
                 done = True
             i += 1
 
+        searchTerms = re.compile(rb'(?:search\?q=)((?:(?:\w+)(?:\+))*(?:\w+))')
+        searchTerms = searchTerms.findall(SearchEngine)
+        searchTerms = ' '.join(str(searchTerms[0]).split('+'))
+
         print(
             f"""
                         -= Task 4 =-
@@ -532,6 +536,7 @@ class PacketCapture:
           Search Engine Address: {SearchEngine}
           Site Reccomended: {ReccomendedSite}
           Malicious Redirect: {MaliciousSite}
+          Search Terms: {str(searchTerms)}
 
                         -= RETURN =- 
         """)
